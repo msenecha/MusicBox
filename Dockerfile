@@ -1,32 +1,9 @@
-# ============================
-# Stage 1: Frontend Build
-# ============================
-FROM node:16 AS frontend
 
-# Set working directory
-WORKDIR /app
-
-# Copy everything into the container
-COPY . .
-
-# Move into frontend directory
-WORKDIR /app/frontend
-
-# Install npm dependencies
-RUN npm install
-
-# Build the React app for production
-RUN npm run build
-
-
-# ============================
-# Stage 2: Backend Build
-# ============================
-FROM python:3.10-slim AS backend
+FROM python:3.10-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Set working directory
 WORKDIR /app
@@ -41,8 +18,6 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the frontend build from the frontend stage to the backend static files
-COPY --from=frontend /app/frontend/build /app/frontend/build
 
 RUN python manage.py makemigrations
 RUN python manage.py migrate
